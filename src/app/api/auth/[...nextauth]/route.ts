@@ -21,7 +21,7 @@ export const authOptions = {
         email: { label: "email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<any> {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter both username and password");
         }
@@ -44,10 +44,7 @@ export const authOptions = {
         }
 
         return {
-          id: user.id.toString(),
-          username: user.username,
-          email: user.email,
-          name: user.name,
+          ...user,
         };
       },
     }),
@@ -63,55 +60,31 @@ export const authOptions = {
   ],
 
   session: {
-    strategy: "jwt" as const, // "jwt" is recommended for stateless sessions
+    strategy: "jwt" as const,
   },
   callbacks: {
-    // This callback is triggered when a user signs in
-    async signIn({
-      user,
-      account,
-      profile,
-    }: {
-      user: any;
-      account: any;
-      profile?: any;
-    }) {
-      // Ensure the user has a username (for OAuth users)
+    async signIn({ user, profile }: { user: any; profile?: any }) {
       if (!user.username) {
         user.username = profile?.email;
       }
-
-      // Ensure user ID is included in the JWT and session
-      if (!user.id) {
-        console.error("No user ID available!");
-      }
-
-      // Make sure the password is set to null for OAuth users
-      user.password = null;
-
+      user.password = null; // Remove sensitive data
       return true;
     },
 
-    // This callback is triggered when the session is created
-    async session({ session, user }: { session: any; user: any }) {
-      if (user) {
-        // Attach the user ID and username to the session object
-        session.user.id = user.id;
-        session.user.username = user.username;
-      }
-
-      return session;
-    },
-
-    // This callback is triggered when the JWT is created
     async jwt({ token, user }: { token: any; user?: any }) {
+      // Attach user data to the token
       if (user) {
-        // Ensure user ID and username are included in the JWT token
-        token.id = user.id;
+        token.id = user.id; // Preserve numeric ID
         token.username = user.username;
       }
-
       return token;
+    },
+
+    async session({ session, token }: { session: any; token: any }) {
+      // Include numeric user ID and username in the session
+      session.user.id = token.id; // Numeric ID is retained
+      session.user.username = token.username;
+      return session;
     },
   },
 };

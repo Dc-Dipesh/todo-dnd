@@ -34,7 +34,7 @@ export function NavMain({
             key={item.url}
             isActive={pathname === item.url}
           >
-            <Link href={item.url} className="flex items-center gap-2">
+            <Link href={item.url} className="flex items-center gap-2 w-full">
               {item.icon && <item.icon />}
               <span>{item.title}</span>
               {/* <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" /> */}

@@ -6,7 +6,8 @@ export default async function ProtectedPage() {
   const session = await getServerSession(authOptions);
   return (
     <div>
-      Welcome, {session.user?.name}!
+      Welcome, {session.user?.name}!{session?.user?.id}
+      {session?.user?.image}
       <LogoutButton />
     </div>
   );
